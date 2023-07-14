@@ -5,6 +5,7 @@ import glob
 import numpy as np
 import csv
 
+from itertools import pairwise
 from scipy.stats import gaussian_kde
 from sklearn.neighbors import NearestNeighbors
 from PIL import Image
@@ -49,22 +50,45 @@ def get_outlines(masks, min_size, verbose=False):
         if len(pix) > 4:
             yield pix
 
+def rot_matrix(t):
+    return np.array([[np.cos(t), -np.sin(t)],[np.sin(t), np.cos(t)]])
+
+def scale(x, y, angle, factor):
+    x1, y1 = rot_matrix(-angle) @ np.array([x, y])
+    x2, y2 = rot_matrix(angle) @ np.array([x1, y1 * factor])
+    return x2, y2
+
+def get_anchor(measure_from, rect):
+    if measure_from == 'center':
+        return rect[0]
+    ps = cv2.boxPoints(rect)
+    centers = np.array([(p1 + p2)/2 for p1, p2 in pairwise(np.vstack([ps, ps[0]]))])
+    if measure_from == 'left':
+        return centers[np.argmin(centers[:, 0])]
+    if measure_from == 'right':
+        return centers[np.argmax(centers[:, 0])]
+    if measure_from == 'top':
+        return centers[np.argmin(centers[:, 1])]
+    if measure_from == 'bottom':
+        return centers[np.argmax(centers[:, 1])]
+    raise ValueError('Invalid `measure_from`!')
+
 def find_pairs(outlines, img, outfile, angle,
-               max_dist=1000, neighbors=2, scaling_factor=10):
+               max_dist=1000, neighbors=2, scaling_factor=10, measure_from='center'):
     rects = [cv2.minAreaRect(o) for o in outlines]
-    rect_centers = [r[0] for r in rects]
-    scaled_centers = [(x/scaling_factor, y) for x, y in rect_centers]
-    nbrs = NearestNeighbors(n_neighbors=neighbors+1, algorithm='ball_tree').fit(scaled_centers)
-    distances, indices = nbrs.kneighbors(scaled_centers)
-    for i, ((_, *idx), (_, *dist)) in enumerate(zip(indices, distances)):
-        for j, d in zip(idx, dist):
-            if d < max_dist: # Reduce to filter out far apart cells
-                c1, c2 = np.intp(rect_centers[i]), np.intp(rect_centers[j])
-                yield c1, c2
-                cv2.line(img, c1, c2, (0, 0, 255), 3)
+    rect_anchors = [get_anchor(measure_from, r) for r in rects]
+    scaled_anchors = [scale(x, y, angle, scaling_factor) for x, y in rect_anchors]
+    nbrs = NearestNeighbors(n_neighbors=neighbors+1, algorithm='ball_tree').fit(scaled_anchors)
+    distances, indices = nbrs.kneighbors(scaled_anchors)
     cv2.drawContours(img, outlines, -1, (0, 255, 0), 3)
     cv2.drawContours(img, [np.intp(cv2.boxPoints(r)) for r in rects],
                      -1, (255, 0, 0), 3)
+    for i, ((_, *idx), (_, *dist)) in enumerate(zip(indices, distances)):
+        for j, d in zip(idx, dist):
+            if d < max_dist: # Reduce to filter out far apart cells
+                c1, c2 = np.intp(rect_anchors[i]), np.intp(rect_anchors[j])
+                yield c1, c2
+                cv2.line(img, c1, c2, (0, 0, 255), 3)
     plt.imshow(img)
     plt.tight_layout()
     plt.savefig(outfile)

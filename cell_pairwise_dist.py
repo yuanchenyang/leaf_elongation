@@ -20,8 +20,11 @@ def main():
                         help='Number of neighbors',
                         default=2)
     parser.add_argument('--scaling_factor', type=int,
-                        help='Scaling factor',
-                        default=10.)
+                        help='Scaling factor, higher values follow image directionality more',
+                        default=10)
+    parser.add_argument('--measure_from',
+                        choices=['center', 'right', 'left', 'top', 'bottom'],
+                        help='Whether to start measuring at right edge of box')
     parser.add_argument("--visualize",
                         help="Include output visualization image",
                         action="store_false")
@@ -49,7 +52,8 @@ def main():
             draw_slope_lines(img, angle, nlines=args.nlines)
             pairs = find_pairs(outlines, im, replace_ext(f, args.img_ext), angle,
                                max_dist=args.max_dist, neighbors=args.neighbors,
-                               scaling_factor=args.scaling_factor)
+                               scaling_factor=args.scaling_factor,
+                               measure_from=args.measure_from)
             for i, (c1, c2) in enumerate(pairs):
                 (x1, y1), (x2, y2) = c1, c2
                 writer.writerow((name, i, x1, y1, x2, y2, np.linalg.norm(c1-c2)))

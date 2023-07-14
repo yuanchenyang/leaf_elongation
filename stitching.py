@@ -1,13 +1,18 @@
-#@ String(value='Directory to images') path
-#@ String(value='Output filename') outfile
-#@ Integer(value='Number of peaks for stitching') peaks
+#@ String(label='Directory to images') path
+#@ String(label='Output filename', value='stitching_result.csv') outfile
+#@ Integer(label='Number of peaks for stitching', value=50) peaks
+#@ Boolean(label='Manually specify ROIs', value=False) manual
 
 
 # Example:
 #   To run on all images in "imgs" folder, output to "stitching_result.csv",
 #   using 50 peaks (more peaks improve accuracy but increases processing time)
 #
-#   ./ImageJ-linux64 --ij2 --console --run stitching.py '[path="imgs",outfile="stitching_result.csv",peaks=50]'
+#   ./ImageJ-linux64 --ij2 --console --run stitching.py '[path="imgs",outfile="stitching_result.csv",peaks=50,manual=false]'
+
+#   To run stitching manually specifying ROIs, run (10 peaks work better):
+#   ./ImageJ-linux64 --ij2 --console --run stitching.py '[path="imgs",outfile="stitching_result.csv",peaks=10,manual=true]'
+
 
 import glob
 import os
@@ -66,7 +71,11 @@ if __name__ in ['__builtin__','__main__']:
         img_names = image_filenames(path)
         for img_name1, img_name2 in pairwise(img_names):
             print(img_name1, img_name2)
-            result = stitch(load_img(img_name1), load_img(img_name2), peaks)
+            im1 = load_img(img_name1)
+            im2 = load_img(img_name2)
+            if manual:
+                IJ.runMacro('waitForUser("Draw ROI, then hit OK");')
+            result = stitch(im1, im2, peaks)
             offset = result.getOffset()
             r_value = result.getCrossCorrelation()
             writer.writerow([get_filename(img_name1), get_filename(img_name2),

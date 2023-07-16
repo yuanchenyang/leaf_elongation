@@ -24,6 +24,7 @@ def main():
                         default=10)
     parser.add_argument('--measure_from',
                         choices=['center', 'right', 'left', 'top', 'bottom'],
+                        default='right',
                         help='Whether to start measuring at right edge of box')
     parser.add_argument("--visualize",
                         help="Include output visualization image",

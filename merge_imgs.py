@@ -13,9 +13,9 @@ def main():
     parser.add_argument('-d', '--result_dir',
                         help='Directory to save merged files',
                         default='merged')
-    parser.add_argument('-r', '--include_reverse',
+    parser.add_argument('-r', '--exclude_reverse',
                         help='Whether to additionally include img2 on top of img1',
-                        action='store_false')
+                        action='store_true')
     args = parser.parse_args()
     open_img = lambda i: Image.open(os.path.join(args.dir, i))
     res_dir = os.path.join(args.dir, args.result_dir)
@@ -42,7 +42,7 @@ def main():
                 args.dir,args.result_dir,
                 f'{os.path.splitext(img1)[0]}__{os.path.splitext(img2)[0]}.jpg')
             res.save(res_path)
-            if args.include_reverse:
+            if not args.exclude_reverse:
                 res.paste(i1, (i1_x, i1_y))
                 res.save(res_path[:-4] + '_r.jpg')
 

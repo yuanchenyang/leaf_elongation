@@ -5,12 +5,17 @@ import glob
 import numpy as np
 import csv
 
-from itertools import pairwise
 from scipy.stats import gaussian_kde
 from sklearn.neighbors import NearestNeighbors
 from PIL import Image
 from roifile import ImagejRoi, roiwrite
 from matplotlib import pyplot as plt
+
+def pairwise(iterable):
+    # pairwise('ABCDEFG') --> AB BC CD DE EF FG
+    a, b = tee(iterable)
+    next(b, None)
+    return zip(a, b)
 
 def get_filenames(args):
     return glob.glob(os.path.join(args.dir, f'*{args.ext}'))

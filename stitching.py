@@ -8,10 +8,10 @@
 #   To run on all images in "imgs" folder, output to "stitching_result.csv",
 #   using 50 peaks (more peaks improve accuracy but increases processing time)
 #
-#   ./ImageJ-linux64 --ij2 --console --run stitching.py '[path="imgs",outfile="stitching_result.csv",peaks=50,manual=false]'
+#   ./ImageJ-linux64 --ij2 --console --run stitching.py '[path="imgs_test",outfile="stitching_result.csv",peaks=50,manual=false]'
 
 #   To run stitching manually specifying ROIs, run (10 peaks work better):
-#   ./ImageJ-linux64 --ij2 --console --run stitching.py '[path="imgs",outfile="stitching_result.csv",peaks=10,manual=true]'
+#   ./ImageJ-linux64 --ij2 --console --run stitching.py '[path="imgs_test",outfile="stitching_result.csv",peaks=10,manual=true]'
 
 
 import glob

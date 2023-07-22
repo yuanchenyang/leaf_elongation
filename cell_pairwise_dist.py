@@ -33,11 +33,10 @@ def main():
                         help='Name of csv file to store cell pairs data',
                         default='pairs.csv')
     args = parser.parse_args()
-    with open(os.path.join(args.dir, args.outfile), 'w') as outfile:
+    with open(get_full_path(args, args.outfile), 'w') as outfile:
         writer = csv.writer(outfile, delimiter=',')
         writer.writerow(['Name', 'Pair No.', 'X1', 'Y1', 'X2', 'Y2', 'Distance'])
         for f in get_filenames(args):
-            name = os.path.split(f)[-1]
             if args.verbose:
                 print('Processing: ', f)
             im = cv2.imread(f.replace(args.ext, '.jpg'))
@@ -57,7 +56,7 @@ def main():
                                measure_from=args.measure_from)
             for i, (c1, c2) in enumerate(pairs):
                 (x1, y1), (x2, y2) = c1, c2
-                writer.writerow((name, i, x1, y1, x2, y2, np.linalg.norm(c1-c2)))
+                writer.writerow((get_name(f), i, x1, y1, x2, y2, np.linalg.norm(c1-c2)))
 
 if __name__=='__main__':
     main()

@@ -34,12 +34,10 @@ def main():
                         action='store_false')
 
     args = parser.parse_args()
-    with open(os.path.join(args.dir, args.outfile), 'w') as outfile:
+    with open(get_full_path(args, args.outfile), 'w') as outfile:
         writer = csv.writer(outfile, delimiter=',')
         writer.writerow(['Name', 'Angle (radians)'])
         for f in get_filenames(args):
-            name = os.path.split(f)[-1]
-            base_name = os.path.splitext(f)[0]
             if args.verbose:
                 print('Processing: ', f)
             im = cv2.imread(f)
@@ -50,16 +48,16 @@ def main():
                                    ksize=args.kernel_size,
                                    verbose=args.verbose,
                                    plot=args.plot)
-            writer.writerow((name, angle))
+            writer.writerow((get_name(f), angle))
             if args.plot:
-                plt.savefig(base_name + '_plot.png')
+                plt.savefig(replace_ext(f,'_plot.png'))
             if args.draw_lines:
                 plt.clf()
                 plt.figure(figsize=(10,6))
                 plt.imshow(im, cmap='gray', vmin=0, vmax=255)
                 draw_slope_lines(im, angle, nlines=args.nlines)
                 plt.tight_layout()
-                plt.savefig(base_name + '_lines.png')
+                plt.savefig(replace_ext(f,'_lines.png'))
 
 if __name__=='__main__':
     main()

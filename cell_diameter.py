@@ -15,13 +15,12 @@ def main():
         writer = csv.writer(outfile, delimiter=',')
         writer.writerow(['Name', 'Cell No.', 'Center X', 'Center Y', 'Width', 'Height', 'Angle'])
         for f in get_filenames(args):
-            name = os.path.split(f)[-1]
             if args.verbose:
                 print('Processing: ', f)
             outlines = get_outlines(open_masks(f), min_size=0, verbose=args.verbose)
             for i, outline in enumerate(outlines):
                 (X, Y), (W, H), A = cv2.minAreaRect(outline)
-                writer.writerow((name, i, X, Y, W, H, A))
+                writer.writerow((get_name(f), i, X, Y, W, H, A))
 
 if __name__=='__main__':
     main()

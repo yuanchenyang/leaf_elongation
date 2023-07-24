@@ -95,6 +95,8 @@ def find_pairs(outlines, img, outfile, angle,
     rects = [cv2.minAreaRect(o) for o in outlines]
     rect_anchors = [get_anchor(measure_from, r) for r in rects]
     scaled_anchors = [scale(x, y, angle, scaling_factor) for x, y in rect_anchors]
+    if len(scaled_anchors <= neighbors):
+        return # Too few rects to find neighbors
     nbrs = NearestNeighbors(n_neighbors=neighbors+1, algorithm='ball_tree').fit(scaled_anchors)
     distances, indices = nbrs.kneighbors(scaled_anchors)
     cv2.drawContours(img, outlines, -1, (0, 255, 0), 3)

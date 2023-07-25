@@ -14,7 +14,7 @@ def add_stitching_args(parser):
                         default=2)
     parser.add_argument('--min_overlap', type=int,
                         help='Set lower limit for overlapping region',
-                        default=500000)
+                        default=1000000)
     parser.add_argument('--min_sample', type=int,
                         help='Regions with more than this amount of overlap will be subsampled for increased speed',
                         default=math.inf)

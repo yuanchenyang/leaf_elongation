@@ -42,7 +42,7 @@ def main():
     with open(get_full_path(args, args.stitching_result)) as csvfile:
         reader = csv.reader(csvfile)
         next(reader) # skip header row
-        for img1, img2, dx, dy, _ in reader:
+        for img1, img2, dx, dy, *_ in reader:
             merge_imgs(args, res_dir, img1, img2, dx, dy)
 
 if __name__=='__main__':

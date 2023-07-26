@@ -13,8 +13,8 @@ def add_stitching_args(parser):
                         help='Number of CPU threads to use in FFT',
                         default=2)
     parser.add_argument('--min_overlap', type=int,
-                        help='Set lower limit for overlapping region',
-                        default=1000000)
+                        help='Set lower limit for overlapping region as a fraction of total image area',
+                        default=0.125)
     parser.add_argument('--min_sample', type=int,
                         help='Regions with more than this amount of overlap will be subsampled for increased speed',
                         default=math.inf)
@@ -31,8 +31,8 @@ def add_stitching_args(parser):
                         help='Distance to consider as part of same cluster when finding peak centroid',
                         default=25)
     parser.add_argument('--filter_radius', nargs="+", type=int,
-        default=(100,50,20), #(50,100,20,300,10,200,400,30,500,40),
-        help='Low-pass filter radii to try, smaller matches coarser/out-of-focus features')
+                        default=(100,50,20),
+                        help='Low-pass filter radii to try, smaller matches coarser/out-of-focus features')
     return parser
 
 def main():

@@ -190,7 +190,7 @@ def corr(a1, a2):
         return 0
     return np.corrcoef(a1, a2)[0,1]
 
-def get_overlap(img1, img2, coords, min_overlap=0, min_sample=np.inf, sample_factor=10):
+def get_overlap(img1, img2, coords, min_overlap=0., min_sample=np.inf, sample_factor=10):
     dx, dy = coords
     assert img1.shape == img2.shape
     Y, X = img1.shape
@@ -205,7 +205,7 @@ def get_overlap(img1, img2, coords, min_overlap=0, min_sample=np.inf, sample_fac
                            sample_factor=sample_factor)
     assert s1.shape == s2.shape
     area = s1.shape[0] * s1.shape[1]
-    if area < min_overlap:
+    if area < min_overlap*Y*X:
         return -1, area
     f1, f2 = s1.flatten(), s2.flatten()
     if area > min_sample:

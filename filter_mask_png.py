@@ -11,13 +11,19 @@ def main():
     parser.add_argument('-m', '--min_size', type=int,
                         help='Minimum mask area to include',
                         default=500)
+    parser.add_argument('-m', '--max_size', type=int,
+                        help='Maximum mask area to include',
+                        default=1000000)
 
     args = parser.parse_args()
     for f in get_filenames(args):
         if args.verbose:
             print('Processing: ', f)
         masks = open_masks(f)
-        filtered = filter_masks(masks, min_size=args.min_size, verbose=args.verbose)
+        filtered = filter_masks(masks,
+                                min_size=args.min_size,
+                                max_size=args.max_size,
+                                verbose=args.verbose)
         save_masks(replace_ext(f, args.new_ext), filtered)
 
 if __name__=='__main__':

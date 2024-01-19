@@ -122,13 +122,13 @@ def save_rois(filename, outlines, verbose=False):
         os.remove(filename)
     roiwrite(filename, rois)
 
-def filter_masks(masks, min_size, verbose=False):
+def filter_masks(masks, min_size, max_size, verbose=False):
     indices, counts = np.unique(masks, return_counts=True)
     if verbose:
         print(f'{len(counts) - 1} total masks of sizes')
         print(np.sort(counts[1:]))
     for i, count in zip(indices, counts):
-        if count < min_size:
+        if count < min_size or count > max_size:
             masks[masks == i] = 0
     if verbose:
         print(f'{len(np.unique(masks)) - 1} masks after filtering')

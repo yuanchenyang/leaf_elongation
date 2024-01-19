@@ -11,7 +11,7 @@ def main():
     parser.add_argument('-m', '--min_size', type=int,
                         help='Minimum mask area to include',
                         default=500)
-    parser.add_argument('-m', '--max_size', type=int,
+    parser.add_argument('-M', '--max_size', type=int,
                         help='Maximum mask area to include',
                         default=1000000)
 

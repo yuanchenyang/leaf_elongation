@@ -23,8 +23,6 @@ def show_anns(anns):
         img[m] = color_mask
     ax.imshow(img)
 
-def get_sam
-
 sam_checkpoint = "vit_b_lm.pth"
 model_type = "vit_b"
 
@@ -152,68 +150,6 @@ for i in range(len(crop_names)):
   plt.savefig(f"masked_{crop_names[i]}", bbox_inches='tight', pad_inches=0)
   mask_names.append(f"masked_{crop_names[i]}")
   plt.show()
-
-from PIL import Image, ImageFont, ImageDraw
-import numpy
-
-"""Basically
-Dissolve all images into pixles --> concatenate pixels --> pix to image"""
-
-def img_dim(filename):
-    img = Image.open(filename)
-    # pixels = img.load()
-    width, height = img.size #assigns width and height values for iteration later
-    return width, height
-
-def img_to_pix(filename):
-    """
-    Takes a filename (must be inputted as a string with proper file attachment
-    ex: .jpg, .png) and converts that image file to a list of its pixels.
-
-    For RGB images, each pixel is a tuple of (R,G,B) values.
-    For BW images, each pixel is an integer.
-
-    Note: Don't worry about determining if an image is RGB or BW.
-          The PIL library functions you use will return the correct pixel
-          values for either image mode.
-
-    Inputs:
-        filename: string representing an image file, such as 'img_name.jpg'
-
-    Returns: list of pixel values
-             in form (R,G,B) such as [(0,20,55), (30,50,90), ...] for RGB image
-             in form L such as [60, 66, 72...] for BW image
-    """
-    img = Image.open(filename)
-    # pixels = img.load()
-    width, height = img.size #assigns width and height values for iteration later
-    list_pixles = []
-    for ycord in range(height): #iterates through each pixel in a single vertical column, iterates through columns
-        for xcord in range(width):
-            list_pixles.append(img.getpixel((xcord, ycord)))
-    return list_pixles
-
-def pix_to_img(pixels, size, mode):
-    """
-    Creates an Image object from a inputted set of RGB tuples.
-
-    Hint:
-        Step 1: Create a new image object with the specified size and model
-        Step 2: Populate the image object with the pixels. Search for putdata()!
-
-    Inputs:
-        pixels: a list of pixels such as the output of `img_to_pixels`
-        size: a tuple of (width, height) representing the dimensions of the
-              desired image. Assume that size is a valid input such that
-              size[0] * size[1] == len(pixels).
-        mode: 'RGB' or 'L' to indicate an RGB image or a BW image, respectively
-
-    Returns:
-        img: Image object made from list of pixels
-    """
-    new_img = Image.new(mode, size) #initalizes new image
-    new_img.putdata(pixels) #loads pixel data into new image
-    return new_img
 
 number_images = len(mask_names)
 pix = []

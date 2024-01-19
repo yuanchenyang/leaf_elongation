@@ -4,7 +4,6 @@ import cv2
 import glob
 import csv
 import numpy as np
-import scipy.fft as sft
 
 from functools import partial
 from itertools import tee, product, chain
@@ -168,99 +167,5 @@ def draw_slope_lines(im_gray, angle, nlines=10):
 def round_int(s):
     return int(round(float(s),0))
 
-def get_filter_mask(img, r):
-    x, y = img.shape
-    mask = np.zeros((x, y), dtype="uint8")
-    cv2.circle(mask, (y//2, x//2), r, 255, -1)
-    return mask
-
 def read_img(filename):
     return np.float64(cv2.imread(filename, cv2.IMREAD_GRAYSCALE))
-
-def apply_filter(img, filter_mask, inverse=False):
-    res = sft.fftshift(img)
-    if inverse:
-        res[filter_mask != 0] = 0
-    else:
-        res[filter_mask == 0] = 0
-    return sft.ifftshift(res)
-
-def corr(a1, a2):
-    if len(a1) == 0 or len(a2) == 0:
-        return 0
-    return np.corrcoef(a1, a2)[0,1]
-
-def get_overlap(img1, img2, coords, min_overlap=0., min_sample=np.inf, sample_factor=10):
-    dx, dy = coords
-    assert img1.shape == img2.shape
-    Y, X = img1.shape
-    if dy >= 0 and dx >= 0:
-        s1, s2 = img1[dy:Y, dx:X], img2[0:Y-dy, 0:X-dx]
-    elif dy < 0 and dx >= 0:
-        s1, s2 = img1[0:Y+dy, dx:X], img2[-dy:Y, 0:X-dx]
-    else:
-        return get_overlap(img2, img1, (-dx, -dy),
-                           min_overlap=min_overlap,
-                           min_sample=min_sample,
-                           sample_factor=sample_factor)
-    assert s1.shape == s2.shape
-    area = s1.shape[0] * s1.shape[1]
-    if area < min_overlap*Y*X:
-        return -1, area
-    f1, f2 = s1.flatten(), s2.flatten()
-    if area > min_sample:
-        print("sampled")
-        indices = np.random.randint(0, area, size=area // sample_factor)
-        f1, f2 = f1[indices], f2[indices]
-    return corr(f1, f2), area
-
-def round_int(x):
-    return np.round(x).astype('int')
-
-def centroids(coords, labels):
-    for c in range(labels.max()+1):
-        yield round_int(coords[labels == c].mean(axis=0))
-
-def get_peak_centroids(args, res):
-    #yield round_int(np.unravel_index(np.argmax(res), res.shape))
-    #cutoff = res > (res.mean() + args.peak_cutoff_std * res.std())
-    cutoff = res > (res.max() - args.peak_cutoff_std * res.std())
-    if cutoff.sum() > 2:
-        X = np.argwhere(cutoff)
-        labels = AgglomerativeClustering(
-            n_clusters=None,
-            linkage='single',
-            distance_threshold=args.peaks_dist_threshold
-        ).fit(X).labels_
-        cents = list(centroids(X, labels))
-        yield from sorted(cents, key=lambda coord: res[tuple(coord)])
-    else:
-        yield from np.argwhere(cutoff)
-
-def stitches(args, img1, img2):
-    assert img1.shape == img2.shape
-    win = cv2.createHanningWindow(img1.T.shape, cv2.CV_64F)
-    Y, X = img1.shape
-    for use_win in args.use_wins:
-        f1, f2 = [sft.fft2(img * win if use_win else img,
-                           norm='ortho', workers=args.workers)
-                  for img in (img1, img2)]
-        for r in args.filter_radius:
-            mask = get_filter_mask(img1, r)
-            G1, G2 = [apply_filter(f, mask) for f in (f1, f2)]
-            R = G1 * np.ma.conjugate(G2)
-            R /= np.absolute(R)
-            res = sft.ifft2(R, norm='ortho', workers=args.workers).real
-            for dy, dx in get_peak_centroids(args, res):
-                for dX, dY in product((dx, -X+dx), (dy, -Y+dy)):
-                    corr, area = get_overlap(img1, img2, (dX, dY),
-                                             min_overlap=args.min_overlap,
-                                             min_sample=args.min_sample)
-                    if args.verbose:
-                        print(f'dx:{dX: 5} dy:{dY: 5} corr:{corr:+f} area:{area: 9} r:{r: 3}')
-                    yield corr, res, (dX, dY), res[dY, dX], area, r, use_win
-                    if corr >= args.early_term_thresh:
-                        return
-
-def stitch(args, img1, img2):
-    return max(stitches(args, img1, img2), key=lambda x: x[0]) # corr, res, idx, val

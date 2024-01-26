@@ -1,44 +1,50 @@
-import torchvision
+import os
 import numpy as np
 import torch
 import matplotlib.pyplot as plt
 import cv2
-import numpy
+import shutil
 
+from segment_anything import (
+    sam_model_registry, SamAutomaticMaskGenerator, SamPredictor
+)
 from PIL import Image, ImageFont, ImageDraw
-from segment_anything import sam_model_registry, SamAutomaticMaskGenerator, SamPredictor
 
 def show_anns(anns):
+    img = anns_img(anns)
+    ax = plt.gca()
+    ax.set_autoscale_on(False)
+    ax.imshow(img)
+
+def anns_img(anns, rgba=True):
     if len(anns) == 0:
         return
     sorted_anns = sorted(anns, key=(lambda x: x['area']), reverse=True)
-    ax = plt.gca()
-    ax.set_autoscale_on(False)
 
-    img = np.ones((sorted_anns[0]['segmentation'].shape[0], sorted_anns[0]['segmentation'].shape[1], 4))
-    img[:,:,3] = 0
+    img = np.ones((sorted_anns[0]['segmentation'].shape[0], sorted_anns[0]['segmentation'].shape[1],
+                   4 if rgba else 3))
+    if rgba:
+        img[:,:,3] = 0
     for ann in sorted_anns:
         m = ann['segmentation']
-        color_mask = np.concatenate([np.random.random(3), [0.35]])
+        if rgba:
+            color_mask = np.concatenate([np.random.random(3), [0.35]])
+        else:
+            color_mask = np.random.randint(0,255, size=(3,))
         img[m] = color_mask
-    ax.imshow(img)
+    return img
 
-sam_checkpoint = "vit_b_lm.pth"
+sam_checkpoint = "/content/vit_b_lm.pth?download=1"
 model_type = "vit_b"
-
 device = "cuda"
-
 sam = sam_model_registry[model_type](checkpoint=sam_checkpoint)
 sam.to(device=device)
-
-mask_generator = SamAutomaticMaskGenerator(sam)
-
-
 
 """
 Basically -- find height of image --> turn img into pix and seperate px into batches each a fraction of img height
 --> turn batches into images run them through sam --> turn results back into pixles
 and concatanate together into original image height """
+
 def img_dim(filename):
     img = Image.open(filename)
     # pixels = img.load()
@@ -77,12 +83,12 @@ def crop_img(pix, dim):
     width = dim[0]
     height = dim[1]
     raw_pix_list = pix
-    layer_height = int(height/5)
-    xtra_layer = height % 5
+    layer_height = int(height/7)
+    xtra_layer = height % 7
     cropped_pix_batches = []
-    for layers in range(1,6):
+    for layers in range(1,8):
         layer_height_end = layer_height
-        if layers == 5:
+        if layers == 7:
             layer_height_end = layer_height + xtra_layer
         cropped_pix_batches.append(raw_pix_list[(layers-1)*layer_height*width:layers*layer_height_end*width])
     return [cropped_pix_batches, layer_height, xtra_layer]
@@ -109,81 +115,95 @@ def pix_to_img(pixels, size, mode):
     new_img.putdata(pixels) #loads pixel data into new image
     return new_img
 
-filename = "2021-02-19-tris_minimal-0307_2023-05-22_068.jpg"
-crop_data = crop_img(img_to_pix(filename), img_dim(filename))
-pix_batches = crop_data.pop(0)
-new_height = crop_data.pop(0)
-xtra_height = crop_data.pop(0)
-orig_dim = img_dim(filename)
-new_width = orig_dim[0]
-counter = 0
-crop_names = []
-for batches in pix_batches:
-    counter = counter + 1
-    if counter == len(pix_batches):
-        new_height = new_height + xtra_height
-    new_dim = (new_width, new_height)
-    img = pix_to_img(batches, new_dim, 'RGB')
-    img.save(f"{counter} crop {filename}")
-    crop_names.append(f"{counter} crop {filename}")
+def SAM_imgcrops (input_dir, filename):
+    filename = str(filename)
+    crop_data = crop_img(img_to_pix(filename), img_dim(filename))
+    pix_batches = crop_data.pop(0)
+    new_height = crop_data.pop(0)
+    xtra_height = crop_data.pop(0)
+    orig_dim = img_dim(filename)
+    new_width = orig_dim[0]
+    counter = 0
+    crop_names = []
+    for batches in pix_batches:
+        counter = counter + 1
+        if counter == len(pix_batches):
+            new_height = new_height + xtra_height
+        new_dim = (new_width, new_height)
+        img = pix_to_img(batches, new_dim, 'RGB')
+        img.save(f"{counter} crop {filename}")
+        crop_names.append(f"{counter} crop {filename}")
 
-mask_generator_2 = SamAutomaticMaskGenerator(
-    model=sam,
-    points_per_side=60,
-    pred_iou_thresh=0.5,
-    stability_score_thresh=0.4,
-    crop_n_layers=2,
-    crop_n_points_downscale_factor=2,
-    min_mask_region_area=100,  # Requires open-cv to run post-processing
-)
+    mask_generator_2 = SamAutomaticMaskGenerator(
+        model=sam,
+        points_per_side=60,
+        pred_iou_thresh=0.5,
+        stability_score_thresh=0.4,
+        crop_n_layers=2,
+        crop_n_points_downscale_factor=2,
+        min_mask_region_area=100,  # Requires open-cv to run post-processing
+    )
 
-from matplotlib import pyplot as plt
-mask_names = []
-for i in range(len(crop_names)):
-  image = cv2.imread(crop_names[i])
-  image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-  masks2 = mask_generator_2.generate(image)
-  plt.figure(figsize=(20, 20))
-  plt.imshow(image)
-  show_anns(masks2)
-  plt.axis('off')
-  plt.savefig(f"masked_{crop_names[i]}", bbox_inches='tight', pad_inches=0)
-  mask_names.append(f"masked_{crop_names[i]}")
-  plt.show()
 
-number_images = len(mask_names)
-pix = []
-width = 0
-height = 0
-for i in range(number_images):
-    filename = mask_names[i]
-    pix2add = img_to_pix(filename)
-    for pixles in pix2add:
-        pix.append(pixles)
-    width2add, height2add = img_dim(filename)
-    width = width2add
-    height = height + height2add
-img = pix_to_img(pix, (width, height), 'RGB')
-img.save(f"forSAM_{filename}")
-img.show()
+    mask_names = []
+    for i in range(len(crop_names)):
+        image = cv2.imread(crop_names[i])
+        image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+        masks2 = mask_generator_2.generate(image)
+        new_img = anns_img(masks2, rgba=False)
+        cv2.imwrite(f"masked_{crop_names[i]}", new_img)
+        mask_names.append(f"masked_{crop_names[i]}")
+        os.remove(os.path.join(input_dir, crop_names[i]))
 
-mask_generator_2 = SamAutomaticMaskGenerator(
-    model=sam,
-    points_per_side=32,
-    pred_iou_thresh=0.9,
-    stability_score_thresh=0.9,
-    crop_n_layers=2,
-    crop_n_points_downscale_factor=2,
-    min_mask_region_area=100,  # Requires open-cv to run post-processing
-)
+    number_images = len(mask_names)
+    pix = []
+    width = 0
+    height = 0
+    for i in range(number_images):
+        filename = mask_names[i]
+        pix2add = img_to_pix(filename)
+        for pixles in pix2add:
+            pix.append(pixles)
+        dim = img_dim(filename)
+        width2add = dim[0]
+        height2add = dim[1]
+        width = width2add
+        height = height + height2add
+        os.remove(os.path.join(input_dir, filename))
+    img = pix_to_img(pix, (width, height), 'RGB')
+    img.save(f"forSAM_{filename}")
 
-from matplotlib import pyplot as plt
-image = cv2.imread(f"forSAM_{filename}")
-image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-masks2 = mask_generator_2.generate(image)
-plt.figure(figsize=(20, 20))
-plt.imshow(image)
-show_anns(masks2)
-plt.axis('off')
-plt.savefig(f"SAM_{filename}", bbox_inches='tight', pad_inches=0)
-plt.show()
+    mask_generator_2 = SamAutomaticMaskGenerator(
+        model=sam,
+        points_per_side=32,
+        pred_iou_thresh=0.9,
+        stability_score_thresh=0.9,
+        crop_n_layers=2,
+        crop_n_points_downscale_factor=2,
+        min_mask_region_area=100,  # Requires open-cv to run post-processing
+    )
+
+    image = cv2.imread(f"forSAM_{filename}")
+    image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+    masks2 = mask_generator_2.generate(image)
+    new_img = anns_img(masks2, rgba=False)
+    cv2.imwrite(f"SAM_{filename}.png", new_img)
+    #os.remove(os.path.join(input_dir, f"forSAM_{filename}"))
+    plt.imshow(cv2.addWeighted(np.array(new_img, dtype='uint8'), 0.3, image, 0.7, 0) )
+
+    return os.path.join(input_dir, f"SAM_{filename}")
+
+if __name__ == '__main__':
+    Input_Directory = input("Image folder path?")
+    input_dir = os.path.join(Input_Directory, "")
+    save_dir = input_dir+"Masks/"
+    if not os.path.exists(save_dir):
+      os.makedirs(save_dir)
+    else:
+      print("Existing Mask Directory found. Deleting it.")
+      shutil.rmtree(save_dir)
+    os.chdir(input_dir)
+
+    for r, d, f in os.walk(input_dir):
+        for fil in f:
+          SAM_imgcrops(input_dir, fil)

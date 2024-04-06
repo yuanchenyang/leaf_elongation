@@ -34,11 +34,10 @@ def anns_img(anns, rgba=True):
         img[m] = color_mask
     return img
 
-sam_checkpoint = "/content/vit_b_lm.pth?download=1"
-model_type = "vit_b"
-device = "cuda"
-sam = sam_model_registry[model_type](checkpoint=sam_checkpoint)
-sam.to(device=device)
+def get_sam_model(checkpoint, model_type='vit_b', device='cuda'):
+    sam = sam_model_registry[model_type](checkpoint=checkpoint)
+    sam.to(device=device)
+    return sam
 
 """
 Basically -- find height of image --> turn img into pix and seperate px into batches each a fraction of img height
@@ -79,14 +78,14 @@ def img_to_pix(filename):
             list_pixles.append(img.getpixel((xcord, ycord)))
     return list_pixles
 
-def crop_img(pix, dim):
+def crop_img(pix, dim, ncrops=7):
     width = dim[0]
     height = dim[1]
     raw_pix_list = pix
-    layer_height = int(height/7)
-    xtra_layer = height % 7
+    layer_height = int(height/ncrops)
+    xtra_layer = height % ncrops
     cropped_pix_batches = []
-    for layers in range(1,8):
+    for layers in range(1,ncrops+1):
         layer_height_end = layer_height
         if layers == 7:
             layer_height_end = layer_height + xtra_layer
@@ -115,8 +114,7 @@ def pix_to_img(pixels, size, mode):
     new_img.putdata(pixels) #loads pixel data into new image
     return new_img
 
-def SAM_imgcrops (input_dir, filename):
-    filename = str(filename)
+def SAM_imgcrops(sam, input_dir, filename):
     crop_data = crop_img(img_to_pix(filename), img_dim(filename))
     pix_batches = crop_data.pop(0)
     new_height = crop_data.pop(0)
@@ -143,7 +141,6 @@ def SAM_imgcrops (input_dir, filename):
         crop_n_points_downscale_factor=2,
         min_mask_region_area=100,  # Requires open-cv to run post-processing
     )
-
 
     mask_names = []
     for i in range(len(crop_names)):
@@ -194,6 +191,7 @@ def SAM_imgcrops (input_dir, filename):
     return os.path.join(input_dir, f"SAM_{filename}")
 
 if __name__ == '__main__':
+    sam = get_sam_model("/content/vit_b_lm.pth?download=1")
     Input_Directory = input("Image folder path?")
     input_dir = os.path.join(Input_Directory, "")
     save_dir = input_dir+"Masks/"
@@ -206,4 +204,4 @@ if __name__ == '__main__':
 
     for r, d, f in os.walk(input_dir):
         for fil in f:
-          SAM_imgcrops(input_dir, fil)
+          SAM_imgcrops(sam, input_dir, fil)

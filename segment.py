@@ -10,34 +10,7 @@ from segment_anything import (
 )
 from PIL import Image, ImageFont, ImageDraw
 
-def show_anns(anns):
-    img = anns_img(anns)
-    ax = plt.gca()
-    ax.set_autoscale_on(False)
-    ax.imshow(img)
 
-def anns_img(anns, rgba=True):
-    if len(anns) == 0:
-        return
-    sorted_anns = sorted(anns, key=(lambda x: x['area']), reverse=True)
-
-    img = np.ones((sorted_anns[0]['segmentation'].shape[0], sorted_anns[0]['segmentation'].shape[1],
-                   4 if rgba else 3))
-    if rgba:
-        img[:,:,3] = 0
-    for ann in sorted_anns:
-        m = ann['segmentation']
-        if rgba:
-            color_mask = np.concatenate([np.random.random(3), [0.35]])
-        else:
-            color_mask = np.random.randint(0,255, size=(3,))
-        img[m] = color_mask
-    return img
-
-def get_sam_model(checkpoint, model_type='vit_b', device='cuda'):
-    sam = sam_model_registry[model_type](checkpoint=checkpoint)
-    sam.to(device=device)
-    return sam
 
 """
 Basically -- find height of image --> turn img into pix and seperate px into batches each a fraction of img height
@@ -189,6 +162,7 @@ def SAM_imgcrops(sam, input_dir, filename):
     plt.imshow(cv2.addWeighted(np.array(new_img, dtype='uint8'), 0.3, image, 0.7, 0) )
 
     return os.path.join(input_dir, f"SAM_{filename}")
+
 
 if __name__ == '__main__':
     sam = get_sam_model("/content/vit_b_lm.pth?download=1")

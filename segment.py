@@ -185,7 +185,7 @@ def SAM_imgcrops(sam, input_dir, filename):
     masks2 = mask_generator_2.generate(image)
     new_img = anns_img(masks2, rgba=False)
     cv2.imwrite(f"SAM_{filename}.png", new_img)
-    #os.remove(os.path.join(input_dir, f"forSAM_{filename}"))
+    os.remove(os.path.join(input_dir, f"forSAM_{filename}"))
     plt.imshow(cv2.addWeighted(np.array(new_img, dtype='uint8'), 0.3, image, 0.7, 0) )
 
     return os.path.join(input_dir, f"SAM_{filename}")
@@ -194,12 +194,6 @@ if __name__ == '__main__':
     sam = get_sam_model("/content/vit_b_lm.pth?download=1")
     Input_Directory = input("Image folder path?")
     input_dir = os.path.join(Input_Directory, "")
-    save_dir = input_dir+"Masks/"
-    if not os.path.exists(save_dir):
-      os.makedirs(save_dir)
-    else:
-      print("Existing Mask Directory found. Deleting it.")
-      shutil.rmtree(save_dir)
     os.chdir(input_dir)
 
     for r, d, f in os.walk(input_dir):

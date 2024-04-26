@@ -3,6 +3,7 @@ import os
 import cv2
 import glob
 import csv
+import math
 import numpy as np
 
 from functools import partial
@@ -55,13 +56,13 @@ def get_default_parser():
                         action="store_true")
     return parser
 
-def get_outlines(masks, min_size, verbose=False):
+def get_outlines(masks, min_size, verbose=False, max_size=math.inf):
     """ get outlines of masks as a list to loop over for plotting """
     indices, counts = np.unique(masks, return_counts=True)
     if verbose:
         print('Total ROIs:', len(indices) - 1)
     for i, count in zip(indices, counts):
-        if i == 0 or count < min_size:
+        if i == 0 or count < min_size or count > max_size:
             continue
         mn = masks==i
         contours = cv2.findContours(mn.astype(np.uint8), mode=cv2.RETR_EXTERNAL, method=cv2.CHAIN_APPROX_NONE)
@@ -94,7 +95,7 @@ def get_anchor(measure_from, rect):
         return centers[np.argmax(centers[:, 1])]
     raise ValueError('Invalid `measure_from`!')
 
-def find_pairs(outlines, img, outfile, angle,
+def find_pairs(outlines, img, angle,
                max_dist=1000, neighbors=2, scaling_factor=10, measure_from='center'):
     rects = [cv2.minAreaRect(o) for o in outlines]
     rect_anchors = [get_anchor(measure_from, r) for r in rects]
@@ -106,15 +107,14 @@ def find_pairs(outlines, img, outfile, angle,
     cv2.drawContours(img, outlines, -1, (0, 255, 0), 3)
     cv2.drawContours(img, [np.intp(cv2.boxPoints(r)) for r in rects],
                      -1, (255, 0, 0), 3)
+    pairs = []
     for i, ((_, *idx), (_, *dist)) in enumerate(zip(indices, distances)):
         for j, d in zip(idx, dist):
             if d < max_dist: # Reduce to filter out far apart cells
                 c1, c2 = np.intp(rect_anchors[i]), np.intp(rect_anchors[j])
-                yield c1, c2
+                pairs.append((c1, c2))
                 cv2.line(img, c1, c2, (0, 0, 255), 3)
-    plt.imshow(img)
-    plt.tight_layout()
-    plt.savefig(outfile)
+    return pairs, img, indices
 
 def save_rois(filename, outlines, verbose=False):
     rois = [ImagejRoi.frompoints(outline) for outline in outlines]

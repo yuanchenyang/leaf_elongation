@@ -5,14 +5,7 @@ import numpy as np
 from utils import *
 from directionality import add_dir_args
 
-def main():
-    parser = add_dir_args(get_default_parser())
-    parser.add_argument('--ext',
-                        help='Filename extension of masks',
-                        default='_cp_masks_filtered.png')
-    parser.add_argument('--img_ext',
-                        help='Filename extension of output visualization',
-                        default='_vis.png')
+def add_pairwise_args(parser):
     parser.add_argument('--max_dist', type=float,
                         help='Maximum distance to include',
                         default=1000.)
@@ -26,6 +19,18 @@ def main():
                         choices=['center', 'right', 'left', 'top', 'bottom'],
                         default='right',
                         help='Whether to start measuring at right edge of box')
+    return parser
+
+def main():
+    parser = get_default_parser()
+    parser = add_dir_args(parser)
+    parser = add_pairwise_args(parser)
+    parser.add_argument('--ext',
+                        help='Filename extension of masks',
+                        default='_cp_masks_filtered.png')
+    parser.add_argument('--img_ext',
+                        help='Filename extension of output visualization',
+                        default='_vis.png')
     parser.add_argument("--visualize",
                         help="Include output visualization image",
                         action="store_false")
@@ -50,10 +55,14 @@ def main():
                                    plot=args.visualize)
             outlines = list(get_outlines(open_masks(f), min_size=0, verbose=args.verbose))
             draw_slope_lines(img, angle, nlines=args.nlines)
-            pairs = find_pairs(outlines, im, replace_ext(f, args.img_ext), angle,
-                               max_dist=args.max_dist, neighbors=args.neighbors,
-                               scaling_factor=args.scaling_factor,
-                               measure_from=args.measure_from)
+            pairs, img, *_ = find_pairs(outlines, im, angle,
+                                        max_dist=args.max_dist, neighbors=args.neighbors,
+                                        scaling_factor=args.scaling_factor,
+                                        measure_from=args.measure_from)
+            if args.visualize:
+                plt.imshow(img)
+                plt.tight_layout()
+                plt.savefig(replace_ext(f, args.img_ext))
             for i, (c1, c2) in enumerate(pairs):
                 (x1, y1), (x2, y2) = c1, c2
                 writer.writerow((get_name(f), i, x1, y1, x2, y2, np.linalg.norm(c1-c2)))

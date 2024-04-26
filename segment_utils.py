@@ -2,10 +2,12 @@ import torch
 import numpy as np
 import cv2
 import pprint
-from itertools import product
+from itertools import product, pairwise
 from tqdm import tqdm
 from PIL import Image
-from itertools import pairwise
+
+from torchvision.utils import draw_segmentation_masks, save_image
+from torchvision.transforms.functional import pil_to_tensor, to_pil_image
 
 from segment_anything import (
     sam_model_registry, SamAutomaticMaskGenerator, SamPredictor

@@ -17,6 +17,7 @@ def main():
                         help='New extension of mask files',
                         default='_shrunk_cp_masks.png')
     parser.add_argument('--factor',
+                        type=int,
                         help='rescale factor',
                         default=4)
     args = parser.parse_args()

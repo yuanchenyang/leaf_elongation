@@ -42,10 +42,10 @@ def main():
 
 
         outlines = outlines_cells + outlines_stomata
-        pairs, _, indices = find_pairs(outlines, im.copy(), angle,
-                                       max_dist=args.max_dist, neighbors=args.neighbors,
-                                       scaling_factor=args.scaling_factor,
-                                       measure_from=args.measure_from)
+        pairs, _, _, pairs_indices = find_pairs(outlines, im.copy(), angle,
+                                                max_dist=args.max_dist, neighbors=args.neighbors,
+                                                scaling_factor=args.scaling_factor,
+                                                measure_from=args.measure_from)
 
 
         graph = nx.Graph()
@@ -56,9 +56,8 @@ def main():
         for j in range(len(outlines_cells), len(outlines)):
             graph.add_node(j)
             stomata.add(j)
-        for i, *nbrs in indices:
-            for n in nbrs:
-                graph.add_edge(i, n)
+        for i, j in pairs_indices:
+            graph.add_edge(i, j)
 
         selected = set()
         for c in nx.connected_components(graph):

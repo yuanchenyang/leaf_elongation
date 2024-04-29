@@ -104,13 +104,15 @@ def find_pairs(outlines, img, angle,
     cv2.drawContours(img, [np.intp(cv2.boxPoints(r)) for r in rects],
                      -1, (255, 0, 0), 3)
     pairs = []
+    pairs_indices = []
     for i, ((_, *idx), (_, *dist)) in enumerate(zip(indices, distances)):
         for j, d in zip(idx, dist):
             if d < max_dist: # Reduce to filter out far apart cells
                 c1, c2 = np.intp(rect_anchors[i]), np.intp(rect_anchors[j])
                 pairs.append((c1, c2))
+                pairs_indices.append((i, j))
                 cv2.line(img, c1, c2, (0, 0, 255), 3)
-    return pairs, img, indices
+    return pairs, img, indices, pairs_indices
 
 def save_rois(filename, outlines, verbose=False):
     rois = [ImagejRoi.frompoints(outline) for outline in outlines]

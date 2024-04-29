@@ -15,10 +15,6 @@ from PIL import Image
 from roifile import ImagejRoi, roiwrite
 from matplotlib import pyplot as plt
 
-import torch
-from torchvision.utils import draw_segmentation_masks, save_image
-from torchvision.transforms.functional import pil_to_tensor, to_pil_image
-
 def pairwise(iterable):
     # pairwise('ABCDEFG') --> AB BC CD DE EF FG
     a, b = tee(iterable)
@@ -237,15 +233,6 @@ def save_masks_png(filename, masks):
         masks_png[mask["segmentation"]] = i+1
     im = Image.fromarray(masks_png)
     im.save(filename)
-
-def draw_masks_on_img(img: Image, masks_array:np.ndarray, alpha=0.4, grey_img=True) -> torch.tensor:
-    if grey_img:
-        img = img.convert('L').convert('RGB')
-    return draw_segmentation_masks(
-        pil_to_tensor(img),
-        torch.tensor(masks_array),
-        alpha=alpha
-    )
 
 def masks_to_one_hot_array(masks: np.ndarray):
     # (H, W) integer array with to (N, H, W) boolean array

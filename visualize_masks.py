@@ -1,5 +1,6 @@
 from PIL import Image
 from utils import *
+from segment_utils import *
 import cv2
 import os
 import numpy as np

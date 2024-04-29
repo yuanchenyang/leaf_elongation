@@ -6,6 +6,7 @@ from itertools import product, pairwise
 from tqdm import tqdm
 from PIL import Image
 
+import torch
 from torchvision.utils import draw_segmentation_masks, save_image
 from torchvision.transforms.functional import pil_to_tensor, to_pil_image
 
@@ -17,6 +18,15 @@ from segment_anything.utils.amg import (
 )
 
 from utils import *
+
+def draw_masks_on_img(img: Image, masks_array:np.ndarray, alpha=0.4, grey_img=True) -> torch.tensor:
+    if grey_img:
+        img = img.convert('L').convert('RGB')
+    return draw_segmentation_masks(
+        pil_to_tensor(img),
+        torch.tensor(masks_array),
+        alpha=alpha
+    )
 
 def get_sam_model(checkpoint, model_type='vit_b', device='cuda'):
     sam = sam_model_registry[model_type](checkpoint=checkpoint)

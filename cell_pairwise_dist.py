@@ -12,9 +12,9 @@ def add_pairwise_args(parser):
     parser.add_argument('--neighbors', type=int,
                         help='Number of neighbors',
                         default=2)
-    parser.add_argument('--scaling_factor', type=int,
+    parser.add_argument('--scaling_factor', type=float,
                         help='Scaling factor, higher values follow image directionality more',
-                        default=10)
+                        default=10.)
     parser.add_argument('--measure_from',
                         choices=['center', 'right', 'left', 'top', 'bottom'],
                         default='right',

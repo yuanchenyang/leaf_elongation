@@ -1,6 +1,6 @@
 from PIL import Image
 from utils import *
-from segment_utils import *
+
 import cv2
 import os
 import numpy as np
@@ -24,6 +24,7 @@ def main():
         if args.verbose:
             print('Processing: ', f)
         if args.outline:
+            from segment_utils import draw_masks_on_img, to_pil_image
             img = Image.open(imgfile)
             mask_on_img = draw_masks_on_img(img, masks_to_one_hot_array(open_masks(f)))
             to_pil_image(mask_on_img).save(outfile)

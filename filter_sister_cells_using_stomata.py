@@ -23,9 +23,12 @@ def main():
     parser.add_argument('--img_ext',
                         help='Filename extension of output visualization',
                         default='_vis.png')
-    parser.add_argument("--visualize",
+    parser.add_argument("--no_visualize",
                         help="Include output visualization image",
-                        action="store_false")
+                        action="store_true")
+    parser.add_argument('--min_stomata', type=int,
+                        help='Line must have at least this many stomata to be filtered',
+                        default=3)
     args = parser.parse_args()
     for maskfile in get_filenames(args):
         if args.verbose:
@@ -47,7 +50,6 @@ def main():
                                                 scaling_factor=args.scaling_factor,
                                                 measure_from=args.measure_from)
 
-
         graph = nx.Graph()
         cells, stomata = set(), set()
         for i in range(len(outlines_cells)):
@@ -61,13 +63,11 @@ def main():
 
         selected = set()
         for c in nx.connected_components(graph):
-            for n in c:
-                if n in stomata:
-                    break
-            else:
-                selected |= c
+            n_stomata = sum(n in stomata for n in c)
+            if n_stomata < args.min_stomata:
+                selected |= c - stomata
 
-        if args.visualize:
+        if not args.no_visualize:
             plt.figure(figsize=(10,6))
             img = im.copy()
             #draw_slope_lines(img, angle, nlines=args.nlines)

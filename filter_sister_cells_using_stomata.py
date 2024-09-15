@@ -39,6 +39,10 @@ def main():
                                ksize=args.kernel_size,
                                verbose=args.verbose)
         stomata_maskfile = maskfile.replace(args.ext, args.ext_stomata)
+        if not os.path.isfile(stomata_maskfile):
+            if args.verbose:
+                print(f"skipping {maskfile} as {stomata_maskfile} does not exist!")
+            continue
         masks_cells, masks_stomata = map(open_masks, (maskfile, stomata_maskfile))
         outlines_cells, outlines_stomata = [list(get_outlines(m, min_size=0))
                                             for m in (masks_cells, masks_stomata)]

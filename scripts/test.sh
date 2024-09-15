@@ -3,12 +3,14 @@
 python -m cellpose \
        --verbose \
        --use_gpu \
-       --dir test \
-       --pretrained_model training-data/big/models/CP_big_n=3_500_0.1 \
+       --dir selected/test \
+       --pretrained_model selected/train/models/CP_model \
        --diameter 0. \
        --chan 0 \
-       --min_size 100 \
-       --save_outlines \
-       --save_txt \
+       --flow_threshold 0.6 \
+       --cellprob_threshold '-0.5' \
+       --save_mpl \
        --save_png \
+       --save_txt \
        --no_npy \
+&& wc -l selected/test/*.txt

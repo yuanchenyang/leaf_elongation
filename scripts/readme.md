@@ -27,8 +27,7 @@ options:
   --no_merge            Disable generating merged images (default: False)
   --workers WORKERS     Number of CPU threads to use in FFT (default: 2)
   --min_overlap MIN_OVERLAP
-                        Set lower limit for overlapping region as a fraction of total image area (default:
-                        0.125)
+                        Set lower limit for overlapping region as a fraction of total image area (default: 0.125)
   --min_sample MIN_SAMPLE
                         Regions with more than this amount of overlap will be subsampled for increased speed
                         (default: inf)
@@ -125,11 +124,10 @@ Measure two trichome(or any ROI) distances, can change scaling factors to make s
 
 ```console
 $ python cell_pairwise_dist.py --help
-usage: cell_pairwise_dist.py [-h] [-v] [--draw_lines] [--nlines NLINES] [--bins BINS]
-                             [--kernel_size KERNEL_SIZE] [--bw_method BW_METHOD] [--max_dist MAX_DIST]
-                             [--neighbors NEIGHBORS] [--scaling_factor SCALING_FACTOR]
-                             [--measure_from {center,right,left,top,bottom}] [--ext EXT] [--img_ext IMG_EXT]
-                             [--visualize] [--outfile OUTFILE]
+usage: cell_pairwise_dist.py [-h] [-v] [--draw_lines] [--nlines NLINES] [--bins BINS] [--kernel_size KERNEL_SIZE]
+                             [--bw_method BW_METHOD] [--max_dist MAX_DIST] [--neighbors NEIGHBORS]
+                             [--scaling_factor SCALING_FACTOR] [--measure_from {center,right,left,top,bottom}]
+                             [--ext EXT] [--img_ext IMG_EXT] [--visualize] [--outfile OUTFILE]
                              dir
 
 positional arguments:
@@ -274,12 +272,17 @@ Fit a sigmoid curve to cell size against cell location
 
 ```console
 $ python curve_fitting.py --help
-usage: curve_fitting.py [-h] [-v] dir
+usage: curve_fitting.py [-h] [-v] [-e EXT] [-n NEW_EXT] [-p PLOT_EXT] dir
 
 positional arguments:
-  dir            Base directory
+  dir                   Base directory
 
 options:
-  -h, --help     show this help message and exit
-  -v, --verbose  Increase output verbosity (default: False)
+  -h, --help            show this help message and exit
+  -v, --verbose         Increase output verbosity (default: False)
+  -e EXT, --ext EXT     Filename extension of input csv (default: _in.csv)
+  -n NEW_EXT, --new_ext NEW_EXT
+                        Filename extension of output csv (default: _params.csv)
+  -p PLOT_EXT, --plot_ext PLOT_EXT
+                        Filename extension of output plots (default: _plot.png)
 ```

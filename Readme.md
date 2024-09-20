@@ -1,4 +1,4 @@
-### **Leaf Elongation Image Analysis Instructions**
+# **Leaf Elongation Image Analysis Instructions**
 
 ### Train a model
 

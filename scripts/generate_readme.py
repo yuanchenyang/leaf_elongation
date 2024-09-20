@@ -5,7 +5,7 @@ import subprocess
 pattern = r"<<(.*?)>>"
 
 template = \
-"""```shell
+"""```console
 $ python {} --help
 {}
 ```

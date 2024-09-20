@@ -160,43 +160,47 @@ python -m cellpose \
 
 ### Useful tool list to assemble pipelines
 
+For more details, see [`scripts/readme.md`](/scripts/readme.md).
+
 1. Image stitching and extract coordination between two neighboring images
 
-   stitching.py
+   `stitching.py`
 
 2. Image merging
 
-   merge\_imgs.py
+   `merge_imgs.py`
 
 3. Image directionality and extract distribution
 
-   directionality.py
+   `directionality.py`
 
 4. Extract ROI coordinates and ferret’s diameters
 
-   cell\_diameter.py
+   `cell_diameter.py`
 
 5. Cell pairwise distance along image directionality
 
-   cell\_pairwise\_dist.py
+   `cell_pairwise_dist.py`
 
 6. Filter masks that are noise (e.g., areas smaller than 1, usually used before used as training set)
 
-   filter\_mask\_png.py
+   `filter_mask_png.py`
 
 7. Shrink images based on their width (this is usually needed if the cells are too long that can not be recognized by Cellpose)
 
-   shrink\_width.py
+   `shrink_width.py`
 
 8. Visualize masks
 
-   visualize\_masks.py
+   `visualize_masks.py`
 
 9. Filter sister cells using stomata
-   filter\_sister\_cells\_using\_stomata.py
+
+   `filter_sister_cells_using_stomata.py`
+
 10. Fit a sigmoid curve to cell size against cell location
 
-    Curve\_fitting.py
+    `curve_fitting.py`
 
 (input data format: first column with name location; other columns as samples with name of the sames as colnames. Can input a vector of cutoff for tails otherwise use the whole column for fitting. Output parameters in a csv, and output the fitting curve and original data in figures in a pdf. Output rownames are sample names, and colnames are parameters, add l10\_90)
 \* all the python instruction can be found using {function} \-help to get default parameters and flags

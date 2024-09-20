@@ -1,0 +1,56 @@
+## Stitching images
+
+Stitch to get the relative locations of sequential two images in the folder
+
+<<stitching.py>>
+
+## Merging images
+
+Run after stitching to see stitching results
+
+<<merge_imgs.py>>
+
+## Image directionality
+
+Plot distribution of edges in leaf and infer leaf directionality from this distribution.
+
+<<directionality.py>>
+
+## Cell diameters
+
+Get cell sizes, extract ROI coordinates and ferret’s diameters
+
+<<cell_diameter.py>>
+
+## Pairwise distances
+
+Measure two trichome(or any ROI) distances, can change scaling factors to make sure along leaf axis, can also check results and adjust parameters
+
+<<cell_pairwise_dist.py>>
+
+## Filter masks
+
+Remove small masks (usually noise) of mask-like files in the folder, check help to change pattern of files
+
+<<filter_mask_png.py>>
+
+## Shrink images
+
+Shrink images by reducing their width. This is usually needed if the cells are
+too long and have too high an aspect ratio where they cannot be recognized by Cellpose.
+
+<<shrink_width.py>>
+
+## Visualize masks
+
+<<visualize_masks.py>>
+
+## Filter sister cells using stomata
+
+<<filter_sister_cells_using_stomata.py>>
+
+## Curve fitting
+
+Fit a sigmoid curve to cell size against cell location
+
+<<curve_fitting.py>>

@@ -108,10 +108,14 @@ python -m cellpose \
 4. Extract information of cells’ relative positions and diameters along leaf
    1. Automatically stitching adjacent images to compute relative offsets using
       `stitching.py`
+
       ![](/images/sitching1.png) ![](/images/sitching2.png)
+
    2. Find directionality of cells in image to approximate leaf as a piecewise
       linear function using `directionality.py`
+
       ![](/images/directionality.png)
+
    3. First filter out spurious segmented cells using `filter_mask_png.py`, then
       extract cells’ coordinates and diameter with `cell_diameter.py`.
    4. The following R script is used to extract cell length and absolute
@@ -173,12 +177,16 @@ cell00_data<-cell00_data[which(cell00_data[,3]> numbercut1),]
    and overlap at the common region except the region when one model works
    obviously better than another model. If not, retrain the models to better
    accuracy.
+
    ![](/images/model_output.png)
+
 7. Fit into a sigmoid curve, extracting curve parameters using
    `curve_fitting.py` (a cutoff may be used to only fit the model in regions
    before cell length decrease at the tip of the leaf). In our study, R-squared is
    higher than 0.75, with a mean of 0.92.
+
    ![](/images/curve_fit.png)
+
 
 ### Examples of variations
 
@@ -188,11 +196,14 @@ cell00_data<-cell00_data[which(cell00_data[,3]> numbercut1),]
    `cell_pairwise_dist.py`. Usually a lower quantile is used to extract mean
    cell length in each bin, since it tends to be bigger than the real value
    affected by missing trichomes detected.
+
    ![](/images/trichrome.png)
+
 2. Find sister cells in Oat when there are two files of stomata cells next to
    each other, by training an additional model to recognize stomata cells, and
    use them to more accurately identify sister cells with
    `filter_sister_cells_using_stomata.py`.
+
    ![](/images/sister_stomata.png)
 
 ### Useful tool list to assemble pipelines

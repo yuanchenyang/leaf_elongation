@@ -7,7 +7,7 @@
    examples). Usually 3-5 manually segmented images (each with \~30 marked
    cells) are sufficient.
 
-![](/images/image1.png)![](/images/image2.png)
+![](/images/marked_cells1.png)![](/images/marked_cells2.png)
 
 2. Finetune Cellpose base model on these training images to find the best ML
    parameters that work for your images.
@@ -62,7 +62,7 @@ python -m cellpose \
    	--savedir test
 ```
 
-![](/images/image3.png)
+![](/images/segmented_plots.png)
 
 5. Most important parameters to tune:
    * `chan`: Set to same channel as used in training
@@ -87,9 +87,17 @@ python -m cellpose \
 
 1. Input: images folder of one sample, and 2 models that each work best for
    different parts of the sample (e.g. undifferentiated cells and sister cells)
-2. Run cellpose using each of the 2 models to segment ![](/images/image4.png)
-   Undifferentiated cells ![](/images/image5.png) Sister cells at small cell
-   region ![](/images/image6.png) Sister cells at mature cell region
+2. Run cellpose using each of the 2 models to segment
+
+**Undifferentiated cells**
+![](/images/undifferentiated.png)
+
+**Sister cells at small cell regions**
+![](/images/sister_small.png)
+
+**Sister cells at mature cell regions**
+![](/images/sister_mature.png)
+
 3. Quality check: similar to what we did to get an accurate model. If the cell
    segmentations are not accurate, go back to the model training step to get
    more accurate models. However, because the cell length changes gradually
@@ -98,15 +106,15 @@ python -m cellpose \
    used as replicates. This increases the accuracy of the trend fitting along
    the leaf axis in the next step.
 4. Extract information of cells’ relative positions and diameters along leaf
-   a. Automatically stitching adjacent images to compute relative offsets using
-   stitching.py ![](/images/image7.png) ![](/images/image8.png)
+   1. Automatically stitching adjacent images to compute relative offsets using
+      stitching.py ![](/images/sitching1.png) ![](/images/sitching2.png)
    2. Find directionality of cells in image to approximate leaf as a piecewise
-      linear function using directionality.py ![](/images/image9.png)
+      linear function using directionality.py ![](/images/directionality.png)
    3. First filter out spurious segmented cells using `filter_mask_png.py`, then
       extract cells’ coordinates and diameter with `cell_diameter.py`.
    4. The following R script is used to extract cell length and absolute
       locations along the leaf for a single model’s output. Cell lengths are
-      grouped then averaged in bins of width 300𝞵m and cell length is only
+      grouped then averaged in bins of width $300\mu m$ and cell length is only
       output if there are more than 20 cells in the bin. This script takes as
       input the leaf image orientation (option of going left or right along the
       images).
@@ -162,11 +170,11 @@ cell00_data<-cell00_data[which(cell00_data[,3]> numbercut1),]
 6. Aggregate outputs of 2 models. These two models should have gradual changes
    and overlap at the common region except the region when one model works
    obviously better than another model. If not, retrain the models to better
-   accuracy. ![](/images/image10.png)
+   accuracy. ![](/images/model_output.png)
 7. Fit into a sigmoid curve, extracting curve parameters using
    `curve_fitting.py` (a cutoff may be used to only fit the model in regions
    before cell length decrease at the tip of the leaf). In our study, $R^2$ is
-   higher than 0.75, with a mean of 0.92. ![](/images/image11.png)
+   higher than 0.75, with a mean of 0.92. ![](/images/curve_fit.png)
 
 ### Examples of variations
 
@@ -175,11 +183,11 @@ cell00_data<-cell00_data[which(cell00_data[,3]> numbercut1),]
    each pair of trichomes as a proxy for the cell length between them using
    `cell_pairwise_dist.py`. Usually a lower quantile is used to extract mean
    cell length in each bin, since it tends to be bigger than the real value
-   affected by missing trichomes detected.  ![](/images/image12.png)
+   affected by missing trichomes detected.  ![](/images/trichrome.png)
 2. Find sister cells in Oat when there are two files of stomata cells next to
    each other, by training an additional model to recognize stomata cells, and
    use them to more accurately identify sister cells with
-   `filter_sister_cells_using_stomata.py`.  ![](/images/image13.png)
+   `filter_sister_cells_using_stomata.py`.  ![](/images/sister_stomata.png)
 
 ### Useful tool list to assemble pipelines
 

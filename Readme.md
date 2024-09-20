@@ -7,7 +7,8 @@
    examples). Usually 3-5 manually segmented images (each with \~30 marked
    cells) are sufficient.
 
-![](/images/marked_cells1.png)![](/images/marked_cells2.png)
+| ![](/images/marked_cells1.png)  | ![](/images/marked_cells2.png) |
+| ------------- | ------------- |
 
 2. Finetune Cellpose base model on these training images to find the best ML
    parameters that work for your images.
@@ -89,14 +90,18 @@ python -m cellpose \
    different parts of the sample (e.g. undifferentiated cells and sister cells)
 2. Run cellpose using each of the 2 models to segment
 
-**Undifferentiated cells**
-![](/images/undifferentiated.png)
+| Undifferentiated cells  |
+| ------------- |
+| ![](/images/undifferentiated.png) |
 
-**Sister cells at small cell regions**
-![](/images/sister_small.png)
+| Sister cells at small cell regions  |
+| ------------- |
+| ![](/images/sister_small.png) |
 
-**Sister cells at mature cell regions**
-![](/images/sister_mature.png)
+| Sister cells at mature cell regions  |
+| ------------- |
+| ![](/images/sister_mature.png) |
+
 
 3. Quality check: similar to what we did to get an accurate model. If the cell
    segmentations are not accurate, go back to the model training step to get
@@ -107,14 +112,16 @@ python -m cellpose \
    the leaf axis in the next step.
 4. Extract information of cells’ relative positions and diameters along leaf
    1. Automatically stitching adjacent images to compute relative offsets using
-      stitching.py ![](/images/sitching1.png) ![](/images/sitching2.png)
+      `stitching.py`
+      ![](/images/sitching1.png) ![](/images/sitching2.png)
    2. Find directionality of cells in image to approximate leaf as a piecewise
-      linear function using directionality.py ![](/images/directionality.png)
+      linear function using `directionality.py`
+      ![](/images/directionality.png)
    3. First filter out spurious segmented cells using `filter_mask_png.py`, then
       extract cells’ coordinates and diameter with `cell_diameter.py`.
    4. The following R script is used to extract cell length and absolute
       locations along the leaf for a single model’s output. Cell lengths are
-      grouped then averaged in bins of width $300\mu m$ and cell length is only
+      grouped then averaged in bins of width 300um and cell length is only
       output if there are more than 20 cells in the bin. This script takes as
       input the leaf image orientation (option of going left or right along the
       images).
@@ -173,7 +180,7 @@ cell00_data<-cell00_data[which(cell00_data[,3]> numbercut1),]
    accuracy. ![](/images/model_output.png)
 7. Fit into a sigmoid curve, extracting curve parameters using
    `curve_fitting.py` (a cutoff may be used to only fit the model in regions
-   before cell length decrease at the tip of the leaf). In our study, $R^2$ is
+   before cell length decrease at the tip of the leaf). In our study, R-squared is
    higher than 0.75, with a mean of 0.92. ![](/images/curve_fit.png)
 
 ### Examples of variations

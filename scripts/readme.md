@@ -2,7 +2,8 @@
 
 Stitch to get the relative locations of sequential two images in the folder
 
-```python
+```shell
+$ python stitching.py --help
 usage: stitching.py [-h] [-v] [-s STITCHING_RESULT] [-d RESULT_DIR] [-r] [--ext EXT] [--no_merge]
                     [--workers WORKERS] [--min_overlap MIN_OVERLAP] [--min_sample MIN_SAMPLE]
                     [--early_term_thresh EARLY_TERM_THRESH] [--use_wins USE_WINS [USE_WINS ...]]
@@ -49,7 +50,8 @@ options:
 
 Run after stitching to see stitching results
 
-```python
+```shell
+$ python merge_imgs.py --help
 usage: merge_imgs.py [-h] [-v] [-s STITCHING_RESULT] [-d RESULT_DIR] [-r] dir
 
 positional arguments:
@@ -71,7 +73,8 @@ options:
 
 Plot distribution of edges in leaf and infer leaf directionality from this distribution.
 
-```python
+```shell
+$ python directionality.py --help
 usage: directionality.py [-h] [-v] [--draw_lines] [--nlines NLINES] [--bins BINS] [--kernel_size KERNEL_SIZE]
                          [--bw_method BW_METHOD] [-e EXT] [-o OUTFILE] [-p]
                          dir
@@ -100,7 +103,8 @@ options:
 
 Get cell sizes, extract ROI coordinates and ferret’s diameters
 
-```python
+```shell
+$ python cell_diameter.py --help
 usage: cell_diameter.py [-h] [-v] [-e EXT] [-o OUTFILE] dir
 
 positional arguments:
@@ -119,7 +123,8 @@ options:
 
 Measure two trichome(or any ROI) distances, can change scaling factors to make sure along leaf axis, can also check results and adjust parameters
 
-```python
+```shell
+$ python cell_pairwise_dist.py --help
 usage: cell_pairwise_dist.py [-h] [-v] [--draw_lines] [--nlines NLINES] [--bins BINS]
                              [--kernel_size KERNEL_SIZE] [--bw_method BW_METHOD] [--max_dist MAX_DIST]
                              [--neighbors NEIGHBORS] [--scaling_factor SCALING_FACTOR]
@@ -158,7 +163,8 @@ options:
 
 Remove small masks (usually noise) of mask-like files in the folder, check help to change pattern of files
 
-```python
+```shell
+$ python filter_mask_png.py --help
 usage: filter_mask_png.py [-h] [-v] [-e EXT] [-n NEW_EXT] [-m MIN_SIZE] [-M MAX_SIZE] dir
 
 positional arguments:
@@ -182,7 +188,8 @@ options:
 Shrink images by reducing their width. This is usually needed if the cells are
 too long and have too high an aspect ratio where they cannot be recognized by Cellpose.
 
-```python
+```shell
+$ python shrink_width.py --help
 usage: shrink_width.py [-h] [-v] [--ext EXT] [--new_img_ext NEW_IMG_EXT] [--stretch] [--factor FACTOR] dir
 
 positional arguments:
@@ -201,7 +208,8 @@ options:
 
 ## Visualize masks
 
-```python
+```shell
+$ python visualize_masks.py --help
 usage: visualize_masks.py [-h] [-v] [--ext EXT] [--out_ext OUT_EXT] [--outline] dir
 
 positional arguments:
@@ -218,7 +226,8 @@ options:
 
 ## Filter sister cells using stomata
 
-```python
+```shell
+$ python filter_sister_cells_using_stomata.py --help
 usage: filter_sister_cells_using_stomata.py [-h] [-v] [--draw_lines] [--nlines NLINES] [--bins BINS]
                                             [--kernel_size KERNEL_SIZE] [--bw_method BW_METHOD]
                                             [--max_dist MAX_DIST] [--neighbors NEIGHBORS]
@@ -263,7 +272,8 @@ options:
 
 Fit a sigmoid curve to cell size against cell location
 
-```python
+```shell
+$ python curve_fitting.py --help
 usage: curve_fitting.py [-h] [-v] dir
 
 positional arguments:

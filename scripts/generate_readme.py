@@ -5,7 +5,8 @@ import subprocess
 pattern = r"<<(.*?)>>"
 
 template = \
-"""```python
+"""```shell
+$ python {} --help
 {}
 ```
 """
@@ -21,7 +22,7 @@ def replace_with_help_string(match):
         return f"<<{script_name}>>"  # Keep the original if an error occurs
 
     # Return the help string
-    return template.format(help_output.strip())
+    return template.format(script_name, help_output.strip())
 
 def process_file(input_filename, output_filename):
     with open(input_filename, 'r') as file:

@@ -109,7 +109,9 @@ python -m cellpose \
    1. Automatically stitching adjacent images to compute relative offsets using
       `stitching.py`
 
-      ![](/images/sitching1.png) ![](/images/sitching2.png)
+      ![](/images/stitching1.png)
+
+      ![](/images/stitching2.png)
 
    2. Find directionality of cells in image to approximate leaf as a piecewise
       linear function using `directionality.py`
